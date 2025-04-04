@@ -1,4 +1,3 @@
-
 local CoreGui = game:GetService("StarterGui")
 CoreGui:SetCore("SendNotification", {
   Title = "AdvanceTech Arsenal",
@@ -51,7 +50,10 @@ local LocalPlayer = Players.LocalPlayer
 local AimbotEnabled = false
 local AimbotFOV = 100
 local AimbotColor = Color3.fromRGB(255, 255, 255)
-local AimbotKey = game:GetService("HttpService"):JSONDecode(game:GetService("HttpService"):GetAsync("AimbotKey") or "{\"key\":\"E\"}").key
+local AimbotKey = "E"
+pcall(function()
+    AimbotKey = game:GetService("HttpService"):JSONDecode(game:GetService("HttpService"):GetAsync("AimbotKey") or "{\"key\":\"E\"}").key
+end)
 local AimbotTarget = nil
 
 -- Create FOV Circle
@@ -203,7 +205,11 @@ local function GetClosestPlayerToCursor()
     local Target = nil
     
     for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+        if v ~= LocalPlayer and v.Character and 
+           v.Character:FindFirstChild("Head") and 
+           v.Character:FindFirstChild("Humanoid") and 
+           v.Character.Humanoid.Health > 0 and
+           workspace:FindFirstChild("Camera") then
             if teamCheck == "FFA" or teamCheck == "Everyone" or v.Team ~= LocalPlayer.Team then
                 local ScreenPoint = Camera:WorldToScreenPoint(v.Character.Head.Position)
                 local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
@@ -365,12 +371,17 @@ MainSection:NewToggle("AutoFarm", "?", function(bool)  -- its really trash but i
     end
 
     local function AutoFarm()
-        game:GetService("ReplicatedStorage").wkspc.TimeScale.Value = 12
+        local replicatedStorage = game:GetService("ReplicatedStorage")
+        if replicatedStorage and replicatedStorage:FindFirstChild("wkspc") then
+            replicatedStorage.wkspc.TimeScale.Value = 12
+        end
 
         runServiceConnection = game:GetService("RunService").Stepped:Connect(function()
             if getgenv().AutoFarm then
                 local closestPlayer = closestplayer()
-                if closestPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                if closestPlayer and closestPlayer.Character and player.Character and 
+                   player.Character:FindFirstChild("HumanoidRootPart") and 
+                   closestPlayer.Character:FindFirstChild("HumanoidRootPart") then
                     local enemyRootPart = closestPlayer.Character.HumanoidRootPart
 
                     local targetPosition = enemyRootPart.Position - enemyRootPart.CFrame.LookVector * 2 + Vector3.new(0, 2, 0)
@@ -1755,19 +1766,23 @@ end)
 
 local Credit = Window:NewTab("Credits")
 local Section = Credit:NewSection("Credits")
-local Section = Credit:NewSection("Script Developed by: AdvanceFalling Team","And custom + upgrade by : blackof987 aka me")
-Section:NewDropdown("Developer", "Dev", {"YellowGreg", "WspBoy12", "MMSVon", "ShadowClark", "Frostbite", "Blackof987"}, function(currentDeveloper)
+local Section = Credit:NewSection("Script Developed by: AdvanceFalling Team")
+Section:NewDropdown("Developer", "Dev", {"YellowGreg", "WspBoy12", "MMSVon", "ShadowClark", "Frostbite"}, function(currentDeveloper)
     local creations = {
         YellowGreg = "Owner",
         WspBoy12 = "Head Developer",
         MMSVon = "Head Developer",
         ShadowClark = "Head Developer",
         Frostbite = "Head Developer",
-	Blackof987 = "Custom"
     }
     print(currentDeveloper .. " created " .. creations[currentDeveloper])
 end)
 local Section = Credit:NewSection("UI Framework: Kavo.")
+local Section = Credit:NewSection("Report Non-Functional Bugs Scripts on Discord")
+Section:NewButton("Copy Discord Link", "Discord", function()
+    setclipboard("https://discord.com/invite/d2446gBjfq")
+end)
+
 
 
 --// Gui Button \\--
